@@ -1,0 +1,42 @@
+# Base values for Keycloak 26.1.2
+image:
+  registry: docker.io
+  repository: bitnami/keycloak
+  tag: 26.1.2-debian-12-r0
+
+replicaCount: 1
+production: true
+proxy: edge
+
+http:
+  tlsEnabled: false
+
+postgresql:
+  enabled: true
+  auth:
+    username: keycloak
+    password: "securepassword123"  # Change for production
+    database: keycloak
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: "openebs-hostpath" # opens ebs sv
+resources:
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+
+ingress:
+  enabled: false
+
+tolerations:
+- key: "node-role.kubernetes.io/control-plane"
+  operator: "Exists"
+  effect: "NoSchedule"
+
+# Default hostname (overridden by values-dev.yaml)
+hostname: deviam.pantherslabs.com  # Placeholder

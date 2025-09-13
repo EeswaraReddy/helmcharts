@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-tablespaces
+  namespace: dev-postgresql
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: psql
+          image: bitnami/postgresql:latest
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql
+                  key: postgres-password      # 👈 Correct secret key
+            - name: PGUSER
+              value: postgres                 # 👈 postgres superuser
+          command: ["psql"]
+          args:
+            [
+              "-h", "postgresql",             # 👈 Host (your service name)
+              "-U", "$(PGUSER)",              # 👈 Username from env
+              "-d", "postgres",               # 👈 Database to connect
+              "-f", "/scripts/tablespace.sql" # 👈 SQL file inside container
+            ]
+          volumeMounts:
+            - name: sql-scripts
+              mountPath: /scripts              # 👈 Mount ConfigMap as /scripts
+      volumes:
+        - name: sql-scripts
+          configMap:
+            name: tablespace-sql               # 👈 ConfigMap with your SQL

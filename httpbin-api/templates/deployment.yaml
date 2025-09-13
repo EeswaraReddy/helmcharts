@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-api
+  namespace: httpbin-namespace
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: httpbin-api
+  template:
+    metadata:
+      labels:
+        app: httpbin-api
+    spec:
+      containers:
+      - name: httpbin-api
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        ports:
+        - containerPort: 80
+        resources:
+          {{ toYaml .Values.resources | nindent 12 }}

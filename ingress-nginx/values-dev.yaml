@@ -1,0 +1,8 @@
+controller:
+  hostNetwork: true  # Bind to node IPs
+  replicaCount: 1    # Match )
+  service:
+    type: ClusterIP  # No LoadBalancer needed with hostNetwork
+  ingressClassResource:
+    name: nginx
+    default: true    # Make this the default IngressClass

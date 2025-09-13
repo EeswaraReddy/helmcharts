@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: portal
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "npm install && node app.js"]
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: app
+          mountPath: /usr/src/app/app.js
+          subPath: app.js
+        - name: app
+          mountPath: /usr/src/app/package.json
+          subPath: package.json
+      volumes:
+      - name: app
+        configMap:
+          name: {{ .Release.Name }}-configmap

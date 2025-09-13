@@ -1,0 +1,32 @@
+persistence:
+  defaultStore: default
+  default:
+    driver: "postgres12_pgx"
+    sql:
+      host: postgresql.dev-postgresql.svc.cluster.local
+      port: 5432
+      dbname: "temporal"
+      user: "temporal_user"
+      password: "temporal_pass"
+      existingSecret: ""          # If you have a Kubernetes secret with the password, specify its name here
+      secretName: ""              # Alternatively, specify secret name if using external secrets
+      maxConns: 20
+      maxIdleConns: 20
+      maxConnLifetime: "1h"
+
+  visibility:
+    driver: "postgres12_pgx"
+    sql:
+      host: postgresql.dev-postgresql.svc.cluster.local
+      port: 5432
+      dbname: "temporal_visibility"
+      user: "temporal_user"
+      password: "temporal_pass"
+      existingSecret: ""
+      secretName: ""
+      maxConns: 20
+      maxIdleConns: 20
+      maxConnLifetime: "1h"
+
+cassandra:
+  enabled: false

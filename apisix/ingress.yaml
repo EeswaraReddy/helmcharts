@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8sgpt-web
+  namespace: dev-apisix
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: devapi.pantherslabs.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: apisix-gateway
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - devapi.pantherslabs.com
+    secretName: pantherslabs-tls

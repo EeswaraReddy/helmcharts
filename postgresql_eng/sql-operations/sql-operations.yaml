@@ -1,0 +1,105 @@
+extraDeploy:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ include "common.names.fullname" . }}-init-scripts
+    data:
+      init.sql: |
+        CREATE DATABASE chimera_db TABLESPACE ts_chimera_meta;
+        CREATE USER chimera_user WITH ENCRYPTED PASSWORD 'chimera_pass';
+        GRANT ALL PRIVILEGES ON DATABASE chimera_db TO chimera_user;
+
+        CREATE DATABASE keycloak_db TABLESPACE ts_chimera_meta;
+        CREATE USER keycloak_user WITH ENCRYPTED PASSWORD 'keycloak_pass';
+        GRANT ALL PRIVILEGES ON DATABASE keycloak_db TO keycloak_user;
+  - |
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: {{ include "common.names.fullname" . }}-db-init-v2
+      labels:
+        app.kubernetes.io/component: db-init
+        version: "v2"
+    spec:
+      ttlSecondsAfterFinished: 3600
+      backoffLimit: 5
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: db-init
+              image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  psql -v ON_ERROR_STOP=1 -U {{ .Values.global.postgresql.auth.username }} -d {{ .Values.global.postgresql.auth.database }} <<-EOSQL
+                    DO \$$
+                    BEGIN
+                      IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'vault_db') THEN
+                        CREATE DATABASE vault_db TABLESPACE ts_chimera_meta;
+                        CREATE USER vault_user WITH ENCRYPTED PASSWORD 'vault_pass';
+                        GRANT ALL PRIVILEGES ON DATABASE vault_db TO vault_user;
+                      END IF;
+
+                      IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'datahub_db') THEN
+                        CREATE DATABASE datahub_db TABLESPACE ts_chimera_dh;
+                        CREATE USER datahub_user WITH ENCRYPTED PASSWORD 'datahub_pass';
+                        GRANT ALL PRIVILEGES ON DATABASE datahub_db TO datahub_user;
+                      END IF;
+                    END
+                    \$$;
+                  EOSQL
+              env:
+                - name: PGPASSWORD
+                  value: {{ .Values.global.postgresql.auth.password }}
+                - name: PGHOST
+                  value: {{ include "common.names.fullname" . }}-primary
+                - name: PGPORT
+                  value: "{{ .Values.global.postgresql.service.ports.postgresql }}"
+          securityContext:
+            runAsUser: 1001
+            fsGroup: 1001
+  - |
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: {{ include "common.names.fullname" . }}-db-init-v3
+      labels:
+        app.kubernetes.io/component: db-init
+        version: "v3"
+    spec:
+      ttlSecondsAfterFinished: 3600
+      backoffLimit: 5
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: db-init
+              image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  psql -v ON_ERROR_STOP=1 -U {{ .Values.global.postgresql.auth.username }} -d {{ .Values.global.postgresql.auth.database }} <<-EOSQL
+                    DO \$$
+                    BEGIN
+                      IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'superset_db') THEN
+                        CREATE DATABASE superset_db TABLESPACE ts_chimera_meta;
+                        CREATE USER superset_user WITH ENCRYPTED PASSWORD 'superset_pass';
+                        GRANT ALL PRIVILEGES ON DATABASE superset_db TO superset_user;
+                      END IF;
+                    END
+                    \$$;
+                  EOSQL
+              env:
+                - name: PGPASSWORD
+                  value: {{ .Values.global.postgresql.auth.password }}
+                - name: PGHOST
+                  value: {{ include "common.names.fullname" . }}-primary
+                - name: PGPORT
+                  value: "{{ .Values.global.postgresql.service.ports.postgresql }}"
+          securityContext:
+            runAsUser: 1001
+            fsGroup: 1001

@@ -1,0 +1,31 @@
+replicaCount: 2
+
+image:
+  repository: progressivemindinfra/api-service
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+env:
+  # PostgreSQL configuration (update these values according to your setup)
+  dbHost: postgresql.dev-postgresql.svc.cluster.local  # Your existing PostgreSQL service name
+  dbPort: 5432
+  dbName: chimera_db
+  dbUser: chimera_user
+  dbPassword: chimera_pass
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1024Mi"
+    cpu: "1000m"
+
+probe:
+  path: /actuator/health
+  initialDelaySeconds: 30
+  periodSeconds: 10

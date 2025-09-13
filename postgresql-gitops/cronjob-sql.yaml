@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: apply-sql
+  namespace: dev-postgresql
+spec:
+  schedule: "0 * * * *"  # every 1 hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: psql
+              image: bitnami/postgresql:latest
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql
+                      key: postgres-password   # 👈 Correct secret key (same as Job)
+                - name: PGUSER
+                  value: postgres              # 👈 Add dynamic user like Job
+              command: ["/bin/bash", "-c"]
+              args:
+                [
+                  "for file in /scripts/*.sql; do echo Applying $file; psql -h postgresql -U $(PGUSER) -d postgres -f $file; done"
+                ]
+              volumeMounts:
+                - name: app-sql
+                  mountPath: /scripts
+          volumes:
+            - name: app-sql
+              configMap:
+                name: application-sql          # 👈 Correct configmap name for developer SQLs

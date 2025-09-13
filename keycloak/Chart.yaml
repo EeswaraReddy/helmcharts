@@ -1,0 +1,8 @@
+apiVersion: v2
+name: keycloak
+description: Keycloak IAM with TLS-terminated ingress
+version: 0.1.0
+dependencies:
+  - name: keycloak
+    version: 19.0.0  # Supports Keycloak 26.1.2
+    repository: https://charts.bitnami.com/bitnami

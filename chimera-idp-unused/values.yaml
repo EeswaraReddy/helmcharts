@@ -1,0 +1,67 @@
+# Replica count
+replicaCount: 1
+
+# Image configuration
+image:
+  repository: node
+  tag: "18-alpine"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 3000
+
+# Ingress configuration
+ingress:
+  enabled: true
+  host: "platform.pantherslabs.com"
+  path: "/"
+  annotations:
+    master:
+      nginx.org/mergeable-ingress-type: "master"
+    minion:
+      nginx.org/mergeable-ingress-type: "minion"
+      nginx.ingress.kubernetes.io/auth-type: "oauth2"
+      nginx.ingress.kubernetes.io/auth-url: "https://deviam.pantherslabs.com/auth/realms/master/protocol/openid-connect/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://deviam.pantherslabs.com/auth/realms/master/protocol/openid-connect/auth?redirect_uri=https://$host$request_uri"
+      nginx.ingress.kubernetes.io/auth-response-headers: "Authorization"
+      nginx.ingress.kubernetes.io/auth-ssl-verify: "false"  # Set to true if Keycloak cert is valid
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  tls:
+    enabled: true
+    secretName: "pantherslabs-tls"  # Reuse your existing TLS secret
+
+# Portal configuration
+portal:
+  title: "Chimera Data Platform - Developer Dashboard"
+  services:
+    - name: "Keycloak IAM"
+      url: "https://deviam.pantherslabs.com"
+      username: "admin"
+      description: "SSO and Identity Management"
+      status: "Available"
+    - name: "APISIX Gateway"
+      url: "https://devapi.pantherslabs.com"
+      username: "admin"
+      description: "API Gateway for Data Services"
+      status: "Running"
+    - name: "ArgoCD"
+      url: "https://devargocd.pantherslabs.com"
+      username: "admin"
+      description: "GitOps for Data Deployments"
+      status: "Sync Status: N/A"
+    - name: "GitLab"
+      url: "https://devgitlab.pantherslabs.com"  # Update if different
+      username: "developer"
+      description: "Code and CI/CD for Data Pipelines"
+      status: "Pipeline: N/A"
+    - name: "Hostinger VPS"
+      url: "https://devvps.pantherslabs.com"  # Update if different
+      username: "vpsuser"
+      description: "External VPS for Data Testing"
+      status: "Online"
+
+# Secret for usernames
+secret:
+  enabled: true

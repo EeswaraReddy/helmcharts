@@ -1,0 +1,12 @@
+elasticsearch:
+  enabled: false
+  external: true
+  host: "chimera-opensearch"
+  port: "9200"
+  version: "v7"
+  scheme: "http"
+  logLevel: "error"
+  username: ""
+  password: ""
+  visibility: "temporal_visibility"
+  visibilityIndex: "temporal-visibility"

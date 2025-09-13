@@ -1,0 +1,13 @@
+Chimera Data Platform IDP deployed!
+
+Namespace: {{ .Release.Namespace }}
+
+Access locally:
+1. Run: kubectl port-forward svc/{{ .Release.Name }}-service 3000:3000 -n {{ .Release.Namespace }}
+2. Open: http://localhost:3000 (bypasses Ingress TLS)
+
+Via Ingress:
+- URL: https://{{ .Values.ingress.host }}
+- Ensure DNS points to your Ingress controller and TLS secret is valid.
+
+Authenticate via Keycloak at https://deviam.pantherslabs.com.

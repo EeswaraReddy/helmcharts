@@ -1,0 +1,35 @@
+# Ingress-Nginx installed first
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingress.kubernetes.io/ssl-redirect: "true"
+
+    # If you encounter a redirect loop or are getting a 307 response code 
+    # then you need to force the nginx ingress to connect to the backend using HTTPS.
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # argocd backend using HTTPS
+
+    # face to internet, recommend update to restrict access
+    # nginx.ingress.kubernetes.io/whitelist-source-range: | 
+    #   0.0.0.0/0
+
+  name: ingress-argocd
+  namespace: dev-argocd
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: devargocd.pantherslabs.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: argocd-server
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - devargocd.pantherslabs.com
+    secretName: pantherslabs-tls

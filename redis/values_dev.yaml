@@ -1,6 +1,0 @@
-architecture: standalone
-
-service:
-  type: NodePort
-  nodePorts:
-    redis: 32123  # optional: fixed port, or let Kubernetes assign one

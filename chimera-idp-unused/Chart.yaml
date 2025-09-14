@@ -1,5 +1,0 @@
-apiVersion: v2
-name: chimera-idp  # Changed to match your intent; was chimera-infra
-description: A scalable Internal Developer Platform dashboard for the Chimera Data Platform
-version: 0.4.0
-type: application

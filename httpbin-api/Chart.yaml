@@ -1,4 +1,0 @@
-apiVersion: v2
-name: httpbin-api  # Required field, must match directory name
-description: Simple HTTP API for Testing
-version: 0.1.0
